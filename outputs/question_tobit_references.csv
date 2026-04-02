@@ -1,0 +1,37 @@
+author_id,work_id,volume,osis_ref,chapter_start,verse_start,passage
+polycarp,epistle_to_the_philippians,volume_1,Bible:Tob.4.10,4,10,Tobit iv. 10
+polycarp,epistle_to_the_philippians,volume_1,Bible:Tob.12.9,12,9,Tobit xii. 9
+hermas,pastor,volume_2,Bible:Tob.3.8 Bible:Tob.3.17,3,8,"Tob. iii. 8, 17"
+clement_alex,stromata,volume_2,Bible:Tob.4.15,4,15,Tob. iv. 15
+clement_alex,stromata,volume_2,Bible:Tob.12.8,12,8,Tob. xii. 8
+tertullian,prayer,volume_3,Bible:Tob.12.12,12,12,Tob. xii. 12
+origen,works,volume_4,Bible:Tob.2.3,2,3,Tob. ii. 3
+origen,works,volume_4,Bible:Tob.1.12-Tob.1.14,1,12,Tob. i. 12–14
+origen,works,volume_4,Bible:Tob.1.19,1,19,Tob. i. 19
+origen,works,volume_4,Bible:Tob.1.22,1,22,Tob. i. 22
+origen,against_celsus,volume_4,Bible:Tob.12.7,12,7,Tobit xii. 7
+hippolytus,fragments,volume_5,Bible:Tob.3.17,3,17,Tobit iii. 17
+cyprian,epistles,volume_5,Bible:Tob.4.10,4,10,Tob. iv. 10
+cyprian,treatises,volume_5,Bible:Tob.20.8,20,8,Tob. xx. 8
+cyprian,treatises,volume_5,Bible:Tob.12.12-Tob.12.15,12,12,"Tob. xii.
+12–15"
+cyprian,treatises,volume_5,Bible:Tob.2.14,2,14,Tob. ii. 14
+cyprian,treatises,volume_5,Bible:Tob.12.11-Tob.12.15,12,11,"Tob. xii.
+11–15"
+cyprian,treatises,volume_5,Bible:Tob.12.8-Tob.12.9,12,8,"Tob. xii. 8, 9"
+cyprian,treatises,volume_5,Bible:Tob.14.10-Tob.14.11,14,10,"Tob. xiv. 10, 11"
+cyprian,treatises,volume_5,Bible:Tob.4.5-Tob.4.11,4,5,"Tob. iv.
+5–11"
+cyprian,treatises,volume_5,Bible:Tob.13.6,13,6,Tob. xiii. 6
+cyprian,treatises,volume_5,Bible:Tob.2.2,2,2,Tob. ii. 2
+cyprian,treatises,volume_5,Bible:Tob.4.12,4,12,Tob. iv. 12
+dionysius,extant_fragments,volume_6,Bible:Tob.12.7,12,7,Tobit xii. 7
+anonymous,teaching,volume_7,Bible:Tob.4.15,4,15,Tobit iv. 15
+anonymous,constitutions,volume_7,Bible:Tob.4.16,4,16,Tob. iv. 16
+anonymous,constitutions,volume_7,Bible:Tob.4.15,4,15,Tob. iv. 15
+clement_rome,homily,volume_7,Bible:Tob.12.8-Tob.12.9,12,8,"Tobit xii. 8, 9"
+anonymous,patriarch_testaments,volume_8,Bible:Tob.8.7-Tob.8.8,8,7,"Tobit viii. 7, 8"
+anonymous,apocrypha_nt,volume_8,Bible:Tob.2.10,2,10,Tobit ii. 10
+anonymous,apocrypha_nt,volume_8,Bible:Tob.1.7,1,7,Tobit i. 7
+anonymous,apocrypha_nt,volume_8,Bible:Tob.1.17-Tob.1.18,1,17,"Tobit i. 17, 18"
+anonymous,decretals,volume_8,Bible:Tob.4.15,4,15,Tobit iv. 15

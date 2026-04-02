@@ -6,6 +6,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Iterable
 
+from .constants import CANONICAL_BOOK_ORDER, DEUTEROCANONICAL_BOOKS
 from .models import Reference
 
 
@@ -76,6 +77,8 @@ def write_markdown_report(path: Path, references: list[Reference]) -> None:
     share_deut = (deut_total / total_refs * 100) if total_refs else 0.0
 
     most_cited_book, most_cited_count = Counter(ref.book for ref in references).most_common(1)[0]
+    psalm_chapter_counts = Counter(ref.chapter_start for ref in references if ref.book == "Ps" and ref.chapter_start)
+    most_cited_psalm, most_cited_psalm_count = psalm_chapter_counts.most_common(1)[0] if psalm_chapter_counts else ("n/a", 0)
     most_nt_book, most_nt_count = nt_counts.most_common(1)[0] if nt_counts else ("n/a", 0)
     most_ot_book, most_ot_count = ot_counts.most_common(1)[0] if ot_counts else ("n/a", 0)
     most_deut_book, most_deut_count = deut_counts.most_common(1)[0] if deut_counts else ("n/a", 0)
@@ -85,6 +88,22 @@ def write_markdown_report(path: Path, references: list[Reference]) -> None:
     if per_volume:
         top_deut_volume, counts = max(per_volume.items(), key=lambda item: item[1]["deuterocanonical"])
         top_deut_volume_count = counts["deuterocanonical"]
+
+    quoted_books = {ref.book for ref in references}
+    unquoted_books = [book for book in CANONICAL_BOOK_ORDER if book not in quoted_books]
+    author_books: dict[str, set[str]] = defaultdict(set)
+    author_deut_books: dict[str, set[str]] = defaultdict(set)
+    for ref in references:
+        author_books[ref.author_id].add(ref.book)
+        if ref.book in DEUTEROCANONICAL_BOOKS:
+            author_deut_books[ref.author_id].add(ref.book)
+    broad_non_deut_authors = sorted(
+        [
+            author
+            for author, books in author_books.items()
+            if len(books) >= 15 and len(author_deut_books[author]) == 0
+        ]
+    )
 
     lines: list[str] = [
         "# Ante-Nicene Fathers Scripture Citation Report",
@@ -103,6 +122,16 @@ def write_markdown_report(path: Path, references: list[Reference]) -> None:
         f"3. Most cited Old Testament (non-deuterocanonical) book: **{most_ot_book}** ({most_ot_count} references).",
         f"4. Most cited deuterocanonical book: **{most_deut_book}** ({most_deut_count} references).",
         f"5. Volume with the most deuterocanonical references: **{top_deut_volume}** ({top_deut_volume_count} references).",
+        "",
+        "## Research-Question Snapshot",
+        "",
+        f"- Most frequently cited Psalm chapter: **Psalm {most_cited_psalm}** ({most_cited_psalm_count} references).",
+        f"- Number of canonical books with zero citations in the parsed corpus: **{len(unquoted_books)}**.",
+        (
+            "- Fathers with broad coverage (15+ books) but no deuterocanonical citations: "
+            f"**{', '.join(broad_non_deut_authors) if broad_non_deut_authors else 'none'}**."
+        ),
+        "- Detailed CSVs are generated in `outputs/question_*.csv` for Tobit locations, Psalm popularity, unquoted books, and author coverage.",
         "",
         "## New Testament",
         "",
