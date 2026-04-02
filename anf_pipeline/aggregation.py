@@ -70,20 +70,19 @@ def write_overall_csv(path: Path, counts: Counter[str]) -> None:
 
 
 def write_volume_comparison_csv(path: Path, per_volume_counts: dict[str, Counter[str]]) -> None:
+    def _volume_sort_key(label: str) -> tuple[int, str]:
+        suffix = label.rsplit("_", maxsplit=1)[-1]
+        return (int(suffix), label) if suffix.isdigit() else (10_000, label)
+
+    volume_labels = sorted(per_volume_counts.keys(), key=_volume_sort_key)
+
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle)
-        writer.writerow(["book", "total_count", "volume_1_count", "volume_2_count", "volume_3_count"])
-        v1 = per_volume_counts.get("volume_1", Counter())
-        v2 = per_volume_counts.get("volume_2", Counter())
-        v3 = per_volume_counts.get("volume_3", Counter())
+        writer.writerow(["book", "total_count", *[f"{label}_count" for label in volume_labels]])
 
         for book in CANONICAL_BOOK_ORDER:
-            volume_1_count = v1.get(book, 0)
-            volume_2_count = v2.get(book, 0)
-            volume_3_count = v3.get(book, 0)
-            writer.writerow(
-                [book, volume_1_count + volume_2_count + volume_3_count, volume_1_count, volume_2_count, volume_3_count]
-            )
+            volume_counts = [per_volume_counts.get(label, Counter()).get(book, 0) for label in volume_labels]
+            writer.writerow([book, sum(volume_counts), *volume_counts])
 
 
 def write_parse_diagnostics_csv(path: Path, reports: Iterable[ParseReport]) -> None:

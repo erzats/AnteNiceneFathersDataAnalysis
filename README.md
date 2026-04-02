@@ -17,6 +17,7 @@ For each input volume, the parser extracts `<scripRef ...>` and `<scripCom ...>`
 - `outputs/book_counts_overall.csv` – overall frequency by Bible book
 - `outputs/book_counts_volume_comparison.csv` – canonical book list (incl. deuterocanonical books) with total and per-volume counts for Volumes 1–3
 - `outputs/parse_diagnostics.csv` – parser coverage diagnostics
+- `outputs/analysis_report.md` – consolidated markdown report with notable events, split by New Testament, Old Testament, and deuterocanonical usage
 
 ### Query preview mode (MCP-ready direction)
 
@@ -38,9 +39,7 @@ python data_processer.py
 
 Defaults to:
 
-- `texts/AnteNiceneVolume1.html`
-- `texts/AnteNiceneVolume2.html`
-- `texts/AnteNiceneVolume3.html`
+- all `texts/AnteNiceneVolume*.html` files present in `texts/`
 
 With explicit inputs:
 
@@ -55,6 +54,12 @@ With query preview:
 
 ```bash
 python data_processer.py --query-author Irenaeus --query-book John --query-limit 5
+```
+
+With a custom markdown report location:
+
+```bash
+python data_processer.py --report-md outputs/my_report.md
 ```
 
 ## Architecture

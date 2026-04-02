@@ -19,6 +19,7 @@ from .aggregation import (
 )
 from .parsing import parse_references, volume_label_from_path
 from .query import ReferenceQueryEngine
+from .reporting import write_markdown_report
 
 
 def parse_args() -> argparse.Namespace:
@@ -36,16 +37,23 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--query-book", type=str, help="Optional exact Bible book filter for query preview output.")
     parser.add_argument("--query-volume", type=str, help="Optional volume label filter (e.g., volume_1).")
     parser.add_argument("--query-limit", type=int, default=10, help="Maximum number of query preview rows to print.")
+    parser.add_argument(
+        "--report-md",
+        type=Path,
+        default=Path("outputs/analysis_report.md"),
+        help="Output path for markdown summary report.",
+    )
     return parser.parse_args()
 
 
 def run_pipeline() -> None:
     args = parse_args()
-    inputs = args.inputs or [
-        Path("texts/AnteNiceneVolume1.html"),
-        Path("texts/AnteNiceneVolume2.html"),
-        Path("texts/AnteNiceneVolume3.html"),
-    ]
+    def _input_sort_key(path: Path) -> tuple[int, str]:
+        label = volume_label_from_path(path)
+        suffix = label.rsplit("_", maxsplit=1)[-1]
+        return (int(suffix), label) if suffix.isdigit() else (10_000, label)
+
+    inputs = args.inputs or sorted(Path("texts").glob("AnteNiceneVolume*.html"), key=_input_sort_key)
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -94,12 +102,13 @@ def run_pipeline() -> None:
     write_overall_csv(combined_overall_counts_csv, Counter(ref.book for ref in all_references))
     write_volume_comparison_csv(volume_comparison_csv, per_volume_counts)
     write_parse_diagnostics_csv(parse_diagnostics_csv, diagnostics)
+    write_markdown_report(args.report_md, all_references)
 
     print(f"Parsed {len(all_references)} Bible references across {len(inputs)} volume(s).")
     print(
         "Wrote combined files: "
         f"{combined_long_csv}, {combined_structured_csv}, {combined_author_counts_csv}, "
-        f"{combined_overall_counts_csv}, {volume_comparison_csv}, {parse_diagnostics_csv}"
+        f"{combined_overall_counts_csv}, {volume_comparison_csv}, {parse_diagnostics_csv}, {args.report_md}"
     )
 
     if any([args.query_author, args.query_work, args.query_book, args.query_volume]):
