@@ -1,17 +1,34 @@
 # AnteNiceneFathersDataAnalysis
 
-Small starter project for analyzing Scripture citation patterns in the *Ante-Nicene Fathers* ThML corpus.
+Starter project for analyzing Scripture citation patterns in the *Ante-Nicene Fathers* ThML corpus, now structured as a reusable parsing/query pipeline that can serve future MCP tooling.
 
-## What this currently does
+## Current capabilities
 
-The parser in `data_processer.py` scans one or more ThML/HTML volumes and extracts `<scripRef ...>` tags, then writes:
+The CLI entry point (`data_processer.py`) orchestrates a modular pipeline under `anf_pipeline/`.
+
+### Parsing + outputs
+
+For each input volume, the parser extracts `<scripRef ...>` and `<scripCom ...>` tags and writes:
 
 - Per-volume files (e.g., `outputs/references_long_volume_1.csv`)
-- `outputs/references_long.csv` – one row per Scripture reference across all processed volumes
-- `outputs/book_counts_by_author.csv` – frequency by Church Father (`author_id`) and Bible book across all processed volumes
-- `outputs/book_counts_overall.csv` – overall frequency by Bible book across all processed volumes
-- `outputs/book_counts_volume_comparison.csv` – canonical book list (including deuterocanonical books) with total and per-volume counts for Volumes 1–3
-- `outputs/parse_diagnostics.csv` – parser coverage diagnostics for each input volume (total scripture reference tags from `<scripRef>` and `<scripCom>`, Bible/non-Bible split, multi-book `osisRef` tags, unexpected `osisRef` tag names, and exact duplicate rows removed)
+- `outputs/references_long.csv` – legacy long format (one row per Bible reference)
+- `outputs/references_structured.csv` – enriched format for downstream retrieval systems (volume, normalized OSIS book list, chapter/verse starts, etc.)
+- `outputs/book_counts_by_author.csv` – frequency by Church Father (`author_id`) and Bible book
+- `outputs/book_counts_overall.csv` – overall frequency by Bible book
+- `outputs/book_counts_volume_comparison.csv` – canonical book list (incl. deuterocanonical books) with total and per-volume counts for Volumes 1–3
+- `outputs/parse_diagnostics.csv` – parser coverage diagnostics
+
+### Query preview mode (MCP-ready direction)
+
+You can now run ad hoc filters against parsed in-memory references for rapid exploration and to prototype retrieval behavior for a future MCP server.
+
+Supported filters:
+
+- `--query-author`
+- `--query-work`
+- `--query-book`
+- `--query-volume`
+- `--query-limit`
 
 ## Quick start
 
@@ -19,22 +36,37 @@ The parser in `data_processer.py` scans one or more ThML/HTML volumes and extrac
 python data_processer.py
 ```
 
-By default, this processes:
+Defaults to:
 
 - `texts/AnteNiceneVolume1.html`
 - `texts/AnteNiceneVolume2.html`
 - `texts/AnteNiceneVolume3.html`
 
-Optional flags:
+With explicit inputs:
 
 ```bash
-python data_processer.py --input texts/AnteNiceneVolume1.html --input texts/AnteNiceneVolume2.html --out-dir outputs
+python data_processer.py \
+  --input texts/AnteNiceneVolume1.html \
+  --input texts/AnteNiceneVolume2.html \
+  --out-dir outputs
 ```
 
-## Notes
+With query preview:
 
-- This is currently regex-streaming based (dependency-free).
-- Parsing now runs across whole-file content so `<scripRef>` tags split across line breaks are still captured.
-- Bible references are grouped as `new_testament`, `deuterocanonical`, or `old_testament_or_other`.
-- Deuterocanonical/additional OSIS books are retained as distinct books in outputs (e.g., `AddDan`, `PrAzar`, `Sus`, `Bel`, `AddEsth`, `EpJer`) to preserve research visibility.
-- `parse_diagnostics.csv` is intended as a quick integrity check to detect potential missed-reference patterns.
+```bash
+python data_processer.py --query-author Irenaeus --query-book John --query-limit 5
+```
+
+## Architecture
+
+- `anf_pipeline/parsing.py` – ThML parsing + diagnostics
+- `anf_pipeline/aggregation.py` – CSV writers + count builders
+- `anf_pipeline/query.py` – composable in-memory filtering engine
+- `anf_pipeline/models.py` – stable data models (`Reference`, `ParseReport`)
+- `anf_pipeline/constants.py` – canon ordering and classification constants
+
+This separation keeps your existing CSV analytics workflow intact while creating a cleaner foundation for:
+
+1. richer schema design,
+2. persistent storage/indexing layers,
+3. MCP server endpoints optimized for theological/apologetic/critical querying.
