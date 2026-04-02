@@ -15,6 +15,13 @@
 4. Most cited deuterocanonical book: **Sir** (156 references).
 5. Volume with the most deuterocanonical references: **volume_2** (90 references).
 
+## Research-Question Snapshot
+
+- Most frequently cited Psalm chapter: **Psalm 45** (73 references).
+- Number of canonical books with zero citations in the parsed corpus: **6**.
+- Fathers with broad coverage (15+ books) but no deuterocanonical citations: **arnobius, athenagoras, justin_martyr, theophilus, victorinus**.
+- Detailed CSVs are generated in `outputs/question_*.csv` for Tobit locations, Psalm popularity, unquoted books, and author coverage.
+
 ## New Testament
 
 | Book | References |

@@ -18,6 +18,11 @@ For each input volume, the parser extracts `<scripRef ...>` and `<scripCom ...>`
 - `outputs/book_counts_volume_comparison.csv` – canonical book list (incl. deuterocanonical books) with total and per-volume counts for Volumes 1–3
 - `outputs/parse_diagnostics.csv` – parser coverage diagnostics
 - `outputs/analysis_report.md` – consolidated markdown report with notable events, split by New Testament, Old Testament, and deuterocanonical usage
+- `outputs/question_tobit_references.csv` – rows answering “who cited Tobit and where?”
+- `outputs/question_psalm_popularity.csv` – Psalm chapter popularity ranking
+- `outputs/question_unquoted_books.csv` – canonical books never cited in the parsed corpus
+- `outputs/question_author_coverage.csv` – per-Father breadth + deuterocanonical participation
+- `outputs/anf_references.sqlite` – query-ready relational dataset for open-ended SQL analysis
 
 ### Query preview mode (MCP-ready direction)
 
@@ -30,6 +35,26 @@ Supported filters:
 - `--query-book`
 - `--query-volume`
 - `--query-limit`
+
+### Open-ended querying via SQLite
+
+Every run now rebuilds `outputs/anf_references.sqlite` with one row per normalized Bible reference.
+This allows arbitrary SQL for research questions that are not known ahead of time.
+
+Run an inline SQL query:
+
+```bash
+python data_processer.py \
+  --sql-query "SELECT author_id, COUNT(*) AS citations FROM bible_references GROUP BY author_id ORDER BY citations DESC LIMIT 10"
+```
+
+Run SQL from a file:
+
+```bash
+python data_processer.py --sql-file queries/example_questions.sql --sql-limit 200
+```
+
+Starter SQL patterns live in `queries/example_questions.sql`.
 
 ## Quick start
 
@@ -75,3 +100,7 @@ This separation keeps your existing CSV analytics workflow intact while creating
 1. richer schema design,
 2. persistent storage/indexing layers,
 3. MCP server endpoints optimized for theological/apologetic/critical querying.
+
+## Roadmap
+
+See [`ROADMAP.md`](ROADMAP.md) for the phased plan from extraction outputs to robust question-answering and MCP-ready retrieval.

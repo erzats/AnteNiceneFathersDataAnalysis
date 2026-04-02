@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import re
 from collections import Counter
 from pathlib import Path
 
@@ -19,7 +18,14 @@ from .aggregation import (
 )
 from .parsing import parse_references, volume_label_from_path
 from .query import ReferenceQueryEngine
+from .research import (
+    write_author_coverage_csv,
+    write_psalm_popularity_csv,
+    write_tobit_reference_csv,
+    write_unquoted_books_csv,
+)
 from .reporting import write_markdown_report
+from .storage import rebuild_reference_database, run_sql_query
 
 
 def parse_args() -> argparse.Namespace:
@@ -42,6 +48,28 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=Path("outputs/analysis_report.md"),
         help="Output path for markdown summary report.",
+    )
+    parser.add_argument(
+        "--sqlite-path",
+        type=Path,
+        default=Path("outputs/anf_references.sqlite"),
+        help="Path to SQLite database rebuilt from parsed references.",
+    )
+    parser.add_argument(
+        "--sql-query",
+        type=str,
+        help="Optional ad hoc SQL query to run against the rebuilt SQLite dataset.",
+    )
+    parser.add_argument(
+        "--sql-file",
+        type=Path,
+        help="Optional file containing SQL to run against the rebuilt SQLite dataset.",
+    )
+    parser.add_argument(
+        "--sql-limit",
+        type=int,
+        default=100,
+        help="Maximum number of SQL query rows to print.",
     )
     return parser.parse_args()
 
@@ -95,6 +123,10 @@ def run_pipeline() -> None:
     combined_overall_counts_csv = args.out_dir / "book_counts_overall.csv"
     volume_comparison_csv = args.out_dir / "book_counts_volume_comparison.csv"
     parse_diagnostics_csv = args.out_dir / "parse_diagnostics.csv"
+    tobit_references_csv = args.out_dir / "question_tobit_references.csv"
+    psalm_popularity_csv = args.out_dir / "question_psalm_popularity.csv"
+    unquoted_books_csv = args.out_dir / "question_unquoted_books.csv"
+    author_coverage_csv = args.out_dir / "question_author_coverage.csv"
 
     write_long_csv(combined_long_csv, all_references)
     write_structured_csv(combined_structured_csv, all_references)
@@ -102,14 +134,35 @@ def run_pipeline() -> None:
     write_overall_csv(combined_overall_counts_csv, Counter(ref.book for ref in all_references))
     write_volume_comparison_csv(volume_comparison_csv, per_volume_counts)
     write_parse_diagnostics_csv(parse_diagnostics_csv, diagnostics)
+    write_tobit_reference_csv(tobit_references_csv, all_references)
+    write_psalm_popularity_csv(psalm_popularity_csv, all_references)
+    write_unquoted_books_csv(unquoted_books_csv, all_references)
+    write_author_coverage_csv(author_coverage_csv, all_references)
+    rebuild_reference_database(args.sqlite_path, all_references)
     write_markdown_report(args.report_md, all_references)
 
     print(f"Parsed {len(all_references)} Bible references across {len(inputs)} volume(s).")
     print(
         "Wrote combined files: "
         f"{combined_long_csv}, {combined_structured_csv}, {combined_author_counts_csv}, "
-        f"{combined_overall_counts_csv}, {volume_comparison_csv}, {parse_diagnostics_csv}, {args.report_md}"
+        f"{combined_overall_counts_csv}, {volume_comparison_csv}, {parse_diagnostics_csv}, "
+        f"{tobit_references_csv}, {psalm_popularity_csv}, {unquoted_books_csv}, "
+        f"{author_coverage_csv}, {args.sqlite_path}, {args.report_md}"
     )
+
+    if args.sql_query and args.sql_file:
+        raise ValueError("Use either --sql-query or --sql-file, but not both.")
+
+    sql_text: str | None = args.sql_query
+    if args.sql_file:
+        sql_text = args.sql_file.read_text(encoding="utf-8")
+    if sql_text:
+        columns, rows = run_sql_query(args.sqlite_path, sql_text, args.sql_limit)
+        print(f"\nSQL query returned {len(rows)} row(s). Showing up to {args.sql_limit}:")
+        if columns:
+            writer = csv.writer(__import__("sys").stdout)
+            writer.writerow(columns)
+            writer.writerows(rows)
 
     if any([args.query_author, args.query_work, args.query_book, args.query_volume]):
         engine = ReferenceQueryEngine(all_references)
