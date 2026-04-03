@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from .constants import DEUTEROCANONICAL_BOOKS, NEW_TESTAMENT_BOOKS
+from .constants import DEUTEROCANONICAL_BOOKS, KNOWN_BOOK_IDS, NEW_TESTAMENT_BOOKS
 from .models import ParseReport, Reference
 
 ATTR_RE = re.compile(r"(\w+)\s*=\s*['\"]([^'\"]*)['\"]")
@@ -39,6 +39,10 @@ def parse_references(thml_file: Path) -> tuple[list[Reference], ParseReport]:
     non_bible_reference_tags = 0
     multi_book_osis_tags = 0
     duplicate_rows_removed = 0
+    malformed_osis_references = 0
+    ambiguous_book_ids = 0
+    exact_quote_references = 0
+    probable_allusion_references = 0
 
     text = thml_file.read_text(encoding="utf-8")
     volume_label = volume_label_from_path(thml_file)
@@ -47,7 +51,7 @@ def parse_references(thml_file: Path) -> tuple[list[Reference], ParseReport]:
     other_osis_tags = sum(1 for tag_name in osis_tags if tag_name not in {"scripref", "scripcom"})
 
     for match in EVENT_RE.finditer(text):
-        author_text, work_text, _, attrs, passage = match.groups()
+        author_text, work_text, tag_name, attrs, passage = match.groups()
         if author_text is not None:
             current_author = author_text.strip()
             continue
@@ -69,12 +73,24 @@ def parse_references(thml_file: Path) -> tuple[list[Reference], ParseReport]:
 
         if len(set(books)) > 1:
             multi_book_osis_tags += 1
+            ambiguous_book_ids += 1
+
+        if any(book not in KNOWN_BOOK_IDS for book in books):
+            ambiguous_book_ids += 1
 
         chapter_start, verse_start = "", ""
         segment_match = OSIS_SEGMENT_RE.search(osis_ref)
         if segment_match:
             _, chapter_start, verse_start = segment_match.groups()
             verse_start = verse_start or ""
+        else:
+            malformed_osis_references += 1
+
+        quote_confidence = "exact_citation" if (tag_name or "").lower() == "scripref" else "probable_allusion"
+        if quote_confidence == "exact_citation":
+            exact_quote_references += 1
+        else:
+            probable_allusion_references += 1
 
         references.append(
             Reference(
@@ -88,6 +104,7 @@ def parse_references(thml_file: Path) -> tuple[list[Reference], ParseReport]:
                 books_in_osis=books,
                 chapter_start=chapter_start,
                 verse_start=verse_start,
+                quote_confidence=quote_confidence,
             )
         )
 
@@ -109,5 +126,14 @@ def parse_references(thml_file: Path) -> tuple[list[Reference], ParseReport]:
         multi_book_osis_tags=multi_book_osis_tags,
         other_osis_tags=other_osis_tags,
         duplicate_rows_removed=duplicate_rows_removed,
+        malformed_osis_references=malformed_osis_references,
+        ambiguous_book_ids=ambiguous_book_ids,
+        exact_quote_references=exact_quote_references,
+        probable_allusion_references=probable_allusion_references,
+        duplicate_reference_rationale=(
+            "Exact duplicate removed by tuple(volume, author_id, work_id, book, osis_ref, passage)."
+            if duplicate_rows_removed
+            else ""
+        ),
     )
     return deduped_references, report

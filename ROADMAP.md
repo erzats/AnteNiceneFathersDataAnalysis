@@ -24,10 +24,10 @@ Goal: produce deterministic artifacts that directly answer core historical quest
 
 Goal: make outputs academically trustworthy.
 
-- [ ] Add validation checks for malformed OSIS references and ambiguous book IDs.
-- [ ] Track quote confidence levels (exact citation vs probable allusion).
-- [ ] Add regression fixtures for known edge cases per volume.
-- [ ] Capture duplicate-reference rationale in diagnostics.
+- [x] Add validation checks for malformed OSIS references and ambiguous book IDs.
+- [x] Track quote confidence levels (exact citation vs probable allusion).
+- [x] Add regression fixtures for known edge cases per volume.
+- [x] Capture duplicate-reference rationale in diagnostics.
 
 ## Phase 3 — Query interface and analyst ergonomics
 

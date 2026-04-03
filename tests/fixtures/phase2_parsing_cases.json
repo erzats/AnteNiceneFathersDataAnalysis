@@ -1,0 +1,28 @@
+[
+  {
+    "name": "volume_1_exact_and_duplicate",
+    "filename": "AnteNiceneVolume1_fixture.html",
+    "content": "<authorID>Irenaeus</authorID><workID>Against Heresies</workID><scripRef osisRef='Bible:John.3.16'>For God so loved</scripRef><scripRef osisRef='Bible:John.3.16'>For God so loved</scripRef>",
+    "expected": {
+      "reference_count": 1,
+      "duplicate_rows_removed": 1,
+      "exact_quote_references": 2,
+      "probable_allusion_references": 0,
+      "malformed_osis_references": 0,
+      "ambiguous_book_ids": 0
+    }
+  },
+  {
+    "name": "volume_2_ambiguous_and_malformed",
+    "filename": "AnteNiceneVolume2_fixture.html",
+    "content": "<authorID>Origen</authorID><workID>Commentary</workID><scripCom osisRef='Bible:Tob-Jdt'>allusive</scripCom><scripCom osisRef='Bible:UnknownBook'>unknown book</scripCom>",
+    "expected": {
+      "reference_count": 2,
+      "duplicate_rows_removed": 0,
+      "exact_quote_references": 0,
+      "probable_allusion_references": 2,
+      "malformed_osis_references": 2,
+      "ambiguous_book_ids": 2
+    }
+  }
+]
