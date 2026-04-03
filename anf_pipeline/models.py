@@ -17,6 +17,7 @@ class Reference:
     books_in_osis: tuple[str, ...]
     chapter_start: str
     verse_start: str
+    quote_confidence: str
 
 
 @dataclass(frozen=True)
@@ -28,3 +29,8 @@ class ParseReport:
     multi_book_osis_tags: int
     other_osis_tags: int
     duplicate_rows_removed: int
+    malformed_osis_references: int
+    ambiguous_book_ids: int
+    exact_quote_references: int
+    probable_allusion_references: int
+    duplicate_reference_rationale: str

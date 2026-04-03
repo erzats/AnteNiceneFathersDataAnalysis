@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
     testament_group TEXT NOT NULL,
     books_in_osis TEXT NOT NULL,
     chapter_start TEXT NOT NULL,
-    verse_start TEXT NOT NULL
+    verse_start TEXT NOT NULL,
+    quote_confidence TEXT NOT NULL
 );
 """
 
@@ -54,8 +55,9 @@ def rebuild_reference_database(path: Path, references: list[Reference]) -> None:
                 testament_group,
                 books_in_osis,
                 chapter_start,
-                verse_start
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                verse_start,
+                quote_confidence
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """,
             [
                 (
@@ -69,6 +71,7 @@ def rebuild_reference_database(path: Path, references: list[Reference]) -> None:
                     "|".join(ref.books_in_osis),
                     ref.chapter_start,
                     ref.verse_start,
+                    ref.quote_confidence,
                 )
                 for ref in references
             ],

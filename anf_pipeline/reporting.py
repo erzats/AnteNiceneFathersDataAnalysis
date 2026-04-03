@@ -68,6 +68,8 @@ def write_markdown_report(path: Path, references: list[Reference]) -> None:
     per_volume = _volume_totals(references)
 
     total_refs = len(references)
+    exact_confidence_total = sum(1 for ref in references if ref.quote_confidence == "exact_citation")
+    probable_confidence_total = sum(1 for ref in references if ref.quote_confidence == "probable_allusion")
     nt_total = sum(nt_counts.values())
     ot_total = sum(ot_counts.values())
     deut_total = sum(deut_counts.values())
@@ -114,6 +116,8 @@ def write_markdown_report(path: Path, references: list[Reference]) -> None:
         f"- New Testament references: **{nt_total}** ({share_nt:.1f}%)",
         f"- Old Testament references (excluding deuterocanonical): **{ot_total}** ({share_ot:.1f}%)",
         f"- Deuterocanonical references: **{deut_total}** ({share_deut:.1f}%)",
+        f"- Quote confidence (exact citations): **{exact_confidence_total}**",
+        f"- Quote confidence (probable allusions): **{probable_confidence_total}**",
         "",
         "## Notable Events",
         "",

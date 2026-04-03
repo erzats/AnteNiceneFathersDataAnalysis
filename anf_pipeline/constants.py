@@ -130,3 +130,5 @@ CANONICAL_BOOK_ORDER = [
     "Jude",
     "Rev",
 ]
+
+KNOWN_BOOK_IDS = set(CANONICAL_BOOK_ORDER)

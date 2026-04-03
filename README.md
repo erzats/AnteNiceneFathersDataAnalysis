@@ -41,6 +41,13 @@ Supported filters:
 Every run now rebuilds `outputs/anf_references.sqlite` with one row per normalized Bible reference.
 This allows arbitrary SQL for research questions that are not known ahead of time.
 
+Phase 2 data-hardening additions now include:
+
+- malformed-OSIS and ambiguous-book-ID validation counters in `outputs/parse_diagnostics.csv`
+- quote confidence on each reference row (`exact_citation` from `<scripRef>`, `probable_allusion` from `<scripCom>`)
+- duplicate-reference rationale in diagnostics for auditability
+- regression fixtures in `tests/fixtures/phase2_parsing_cases.json`
+
 Run an inline SQL query:
 
 ```bash
@@ -104,3 +111,14 @@ This separation keeps your existing CSV analytics workflow intact while creating
 ## Roadmap
 
 See [`ROADMAP.md`](ROADMAP.md) for the phased plan from extraction outputs to robust question-answering and MCP-ready retrieval.
+
+## Modern hosting (free-tier friendly)
+
+If you want a hosted research endpoint/API without paid infrastructure to start:
+
+- **Railway (free trial credits / low-friction deploy):** good for quickly exposing a Python API + SQLite-backed read APIs.
+- **Render free web service:** easy Git-based deploy for a small Flask/FastAPI wrapper around `outputs/anf_references.sqlite`.
+- **Cloudflare Workers + D1 (free tier):** best if you later migrate from SQLite file to hosted SQL and want globally distributed low-latency queries.
+- **GitHub Actions + GitHub Releases/Pages:** ideal for scheduled rebuilds of CSV/SQLite artifacts and static publication of reports.
+
+Recommended path: keep parsing in GitHub Actions, publish artifacts, and deploy a tiny read-only API on Render’s free tier first.

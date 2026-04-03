@@ -114,7 +114,11 @@ def run_pipeline() -> None:
             f"non_bible_reference_tags={report.non_bible_reference_tags}, "
             f"multi_book_osis_tags={report.multi_book_osis_tags}, "
             f"other_osis_tags={report.other_osis_tags}, "
-            f"duplicate_rows_removed={report.duplicate_rows_removed}"
+            f"duplicate_rows_removed={report.duplicate_rows_removed}, "
+            f"malformed_osis_references={report.malformed_osis_references}, "
+            f"ambiguous_book_ids={report.ambiguous_book_ids}, "
+            f"exact_quote_references={report.exact_quote_references}, "
+            f"probable_allusion_references={report.probable_allusion_references}"
         )
 
     combined_long_csv = args.out_dir / "references_long.csv"
