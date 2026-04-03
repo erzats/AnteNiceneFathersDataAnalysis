@@ -10,7 +10,6 @@ from pathlib import Path
 from .aggregation import (
     build_author_book_counts,
     write_count_csv,
-    write_long_csv,
     write_overall_csv,
     write_parse_diagnostics_csv,
     write_structured_csv,
@@ -18,14 +17,9 @@ from .aggregation import (
 )
 from .parsing import parse_references, volume_label_from_path
 from .query import ReferenceQueryEngine
-from .research import (
-    write_author_coverage_csv,
-    write_psalm_popularity_csv,
-    write_tobit_reference_csv,
-    write_unquoted_books_csv,
-)
 from .reporting import write_markdown_report
 from .storage import rebuild_reference_database, run_sql_query
+from .web_export import export_web_data
 
 
 def parse_args() -> argparse.Namespace:
@@ -38,6 +32,12 @@ def parse_args() -> argparse.Namespace:
         help="Path to a ThML/HTML input file (repeat for multiple volumes).",
     )
     parser.add_argument("--out-dir", type=Path, default=Path("outputs"), help="Directory for generated CSV files.")
+    parser.add_argument(
+        "--web-data-dir",
+        type=Path,
+        default=Path("web/src/data"),
+        help="Directory for generated JSON files consumed by the Next.js frontend.",
+    )
     parser.add_argument("--query-author", type=str, help="Optional author filter for query preview output.")
     parser.add_argument("--query-work", type=str, help="Optional work filter for query preview output.")
     parser.add_argument("--query-book", type=str, help="Optional exact Bible book filter for query preview output.")
@@ -76,6 +76,7 @@ def parse_args() -> argparse.Namespace:
 
 def run_pipeline() -> None:
     args = parse_args()
+
     def _input_sort_key(path: Path) -> tuple[int, str]:
         label = volume_label_from_path(path)
         suffix = label.rsplit("_", maxsplit=1)[-1]
@@ -97,16 +98,7 @@ def run_pipeline() -> None:
         volume_label = volume_label_from_path(input_file)
         per_volume_counts[volume_label] = Counter(ref.book for ref in references)
 
-        long_csv = args.out_dir / f"references_long_{volume_label}.csv"
-        author_counts_csv = args.out_dir / f"book_counts_by_author_{volume_label}.csv"
-        overall_counts_csv = args.out_dir / f"book_counts_overall_{volume_label}.csv"
-
-        write_long_csv(long_csv, references)
-        write_count_csv(author_counts_csv, build_author_book_counts(references))
-        write_overall_csv(overall_counts_csv, Counter(ref.book for ref in references))
-
         print(f"Parsed {len(references)} Bible references from {input_file}.")
-        print(f"Wrote: {long_csv}, {author_counts_csv}, {overall_counts_csv}")
         print(
             "Diagnostics: "
             f"total_reference_tags={report.total_reference_tags}, "
@@ -121,37 +113,27 @@ def run_pipeline() -> None:
             f"probable_allusion_references={report.probable_allusion_references}"
         )
 
-    combined_long_csv = args.out_dir / "references_long.csv"
     combined_structured_csv = args.out_dir / "references_structured.csv"
     combined_author_counts_csv = args.out_dir / "book_counts_by_author.csv"
     combined_overall_counts_csv = args.out_dir / "book_counts_overall.csv"
     volume_comparison_csv = args.out_dir / "book_counts_volume_comparison.csv"
     parse_diagnostics_csv = args.out_dir / "parse_diagnostics.csv"
-    tobit_references_csv = args.out_dir / "question_tobit_references.csv"
-    psalm_popularity_csv = args.out_dir / "question_psalm_popularity.csv"
-    unquoted_books_csv = args.out_dir / "question_unquoted_books.csv"
-    author_coverage_csv = args.out_dir / "question_author_coverage.csv"
 
-    write_long_csv(combined_long_csv, all_references)
     write_structured_csv(combined_structured_csv, all_references)
     write_count_csv(combined_author_counts_csv, build_author_book_counts(all_references))
     write_overall_csv(combined_overall_counts_csv, Counter(ref.book for ref in all_references))
     write_volume_comparison_csv(volume_comparison_csv, per_volume_counts)
     write_parse_diagnostics_csv(parse_diagnostics_csv, diagnostics)
-    write_tobit_reference_csv(tobit_references_csv, all_references)
-    write_psalm_popularity_csv(psalm_popularity_csv, all_references)
-    write_unquoted_books_csv(unquoted_books_csv, all_references)
-    write_author_coverage_csv(author_coverage_csv, all_references)
     rebuild_reference_database(args.sqlite_path, all_references)
     write_markdown_report(args.report_md, all_references)
+    export_web_data(args.web_data_dir, all_references)
 
     print(f"Parsed {len(all_references)} Bible references across {len(inputs)} volume(s).")
     print(
-        "Wrote combined files: "
-        f"{combined_long_csv}, {combined_structured_csv}, {combined_author_counts_csv}, "
+        "Wrote: "
+        f"{combined_structured_csv}, {combined_author_counts_csv}, "
         f"{combined_overall_counts_csv}, {volume_comparison_csv}, {parse_diagnostics_csv}, "
-        f"{tobit_references_csv}, {psalm_popularity_csv}, {unquoted_books_csv}, "
-        f"{author_coverage_csv}, {args.sqlite_path}, {args.report_md}"
+        f"{args.sqlite_path}, {args.report_md}, {args.web_data_dir}/"
     )
 
     if args.sql_query and args.sql_file:

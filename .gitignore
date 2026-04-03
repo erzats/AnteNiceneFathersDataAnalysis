@@ -1,1 +1,13 @@
-outputs/*.sqlite
+outputs/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+node_modules/
+web/.next/
+web/out/
