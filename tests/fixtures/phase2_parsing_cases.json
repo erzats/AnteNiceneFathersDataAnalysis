@@ -8,6 +8,7 @@
       "duplicate_rows_removed": 1,
       "exact_quote_references": 2,
       "probable_allusion_references": 0,
+      "echo_allusion_references": 0,
       "malformed_osis_references": 0,
       "ambiguous_book_ids": 0
     }
@@ -20,9 +21,41 @@
       "reference_count": 2,
       "duplicate_rows_removed": 0,
       "exact_quote_references": 0,
-      "probable_allusion_references": 2,
+      "probable_allusion_references": 0,
+      "echo_allusion_references": 2,
       "malformed_osis_references": 2,
       "ambiguous_book_ids": 2
+    }
+  },
+  {
+    "name": "volume_3_probable_allusion_sufficient_text",
+    "filename": "AnteNiceneVolume3_fixture.html",
+    "content": "<authorID>Tertullian</authorID><workID>Against Praxeas</workID><scripCom osisRef='Bible:John.1.1'>In the beginning was the Word and the Word was with God</scripCom>",
+    "expected": {
+      "reference_count": 1,
+      "duplicate_rows_removed": 0,
+      "exact_quote_references": 0,
+      "probable_allusion_references": 1,
+      "echo_allusion_references": 0,
+      "malformed_osis_references": 0,
+      "ambiguous_book_ids": 0
+    }
+  },
+  {
+    "name": "volume_4_verse_range_expansion",
+    "filename": "AnteNiceneVolume4_fixture.html",
+    "content": "<authorID>Cyprian</authorID><workID>On the Unity of the Church</workID><scripRef osisRef='Bible:Matt.5.3-12'>Blessed are the poor in spirit for theirs is the kingdom</scripRef>",
+    "expected": {
+      "reference_count": 1,
+      "duplicate_rows_removed": 0,
+      "exact_quote_references": 1,
+      "probable_allusion_references": 0,
+      "echo_allusion_references": 0,
+      "malformed_osis_references": 0,
+      "ambiguous_book_ids": 0,
+      "verse_end": "12",
+      "verse_start": "3",
+      "chapter_start": "5"
     }
   }
 ]

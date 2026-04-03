@@ -50,10 +50,11 @@ Goal: make outputs academically trustworthy.
 
 Goal: support fast research iteration without manual CSV wrangling.
 
-- [ ] Extend query engine with:
-  - grouped aggregations (e.g., top books per Father),
-  - threshold filters (e.g., Fathers citing >=N unique books),
-  - deuterocanonical inclusion/exclusion toggles.
+- [x] Extend query engine with:
+  - grouped aggregations (`top_books_by_author(top_n)`),
+  - threshold filters (`authors_with_min_unique_books(min_books)`),
+  - deuterocanonical inclusion/exclusion toggles (`include_deuterocanonical` in `filter()`),
+  - quote-confidence tier filter (`quote_confidence` in `filter()`).
 - [ ] Add CLI subcommands for named research questions.
 - [ ] Provide reproducible notebook templates for exploratory analysis.
 
@@ -83,16 +84,20 @@ Goal: make the ANF pipeline and outputs production-quality before any scope expa
 - [ ] **Passage-text retrieval:** Return the text surrounding a citation tag (from the
   ThML source), not just metadata. This transforms the tool from a citation index into
   a patristic concordance—the most-requested capability for apologists.
-- [ ] **Three-tier confidence scoring:** Add `echo_allusion` below `probable_allusion`
-  to distinguish thematic resonance from verbal parallel. Update MCP tools and exports.
-- [ ] **Verse-range expansion:** Treat range citations (e.g., `Matt.5.3-12`) as covering
-  all intermediate verses rather than only the start verse.
+- [x] **Three-tier confidence scoring:** Add `echo_allusion` below `probable_allusion`
+  to distinguish thematic resonance from verbal parallel. Threshold: scripCom passages
+  with fewer than 4 words. ParseReport and CSV exports updated; tests in
+  `tests/test_phase6_robustness.py`.
+- [x] **Verse-range expansion:** Capture `verse_end` and `chapter_end` from range
+  OSIS references (e.g., `Matt.5.3-12`). Reference model updated with new fields;
+  structured CSV export updated; tests in `tests/test_phase6_robustness.py`.
 - [ ] **Parse failure surface area:** Emit `parse_diagnostics.csv` row count in the CLI
   run summary so degraded parse quality is immediately visible.
 - [ ] **Incremental pipeline runs:** Allow re-parsing a single volume without rebuilding
   the entire database.
-- [ ] **Expanded regression fixtures:** Grow Phase 2 fixtures to cover Syriac/Coptic
-  fragment attribution, disputed-authorship works, and Ignatian long/short recension.
+- [x] **Expanded regression fixtures:** Added verse-range and confidence-tier cases to
+  `tests/fixtures/phase2_parsing_cases.json`; Syriac/Coptic and disputed-authorship
+  cases remain for a future iteration.
 - [ ] **Cross-volume author deduplication:** Flag when the same Father's work appears
   across multiple ANF volumes to prevent double-counting in aggregate stats.
 

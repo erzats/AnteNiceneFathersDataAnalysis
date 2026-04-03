@@ -16,6 +16,13 @@ EVENT_RE = re.compile(
 OSIS_TAG_RE = re.compile(r"<([a-zA-Z0-9:_-]+)\b[^>]*\bosisRef\s*=", re.IGNORECASE)
 BIBLE_OSIS_BOOK_RE = re.compile(r"Bible:([^.:\s]+)")
 OSIS_SEGMENT_RE = re.compile(r"Bible:([^.\s:]+)\.([0-9]+)(?:\.([0-9]+))?")
+# Phase 6: capture verse-range end, e.g. Bible:Matt.5.3-12 or Bible:Matt.5.3-Matt.5.12
+OSIS_RANGE_RE = re.compile(
+    r"Bible:([^.\s:]+)\.([0-9]+)\.([0-9]+)-(?:[A-Za-z0-9]+\.(?:[0-9]+\.)?)?([0-9]+)"
+)
+
+# Passage word-count threshold below which a scripCom is classified as echo_allusion.
+_ECHO_ALLUSION_WORD_THRESHOLD = 4
 
 
 def classify_book(book: str) -> str:
@@ -43,6 +50,7 @@ def parse_references(thml_file: Path) -> tuple[list[Reference], ParseReport]:
     ambiguous_book_ids = 0
     exact_quote_references = 0
     probable_allusion_references = 0
+    echo_allusion_references = 0
 
     text = thml_file.read_text(encoding="utf-8")
     volume_label = volume_label_from_path(thml_file)
@@ -86,11 +94,30 @@ def parse_references(thml_file: Path) -> tuple[list[Reference], ParseReport]:
         else:
             malformed_osis_references += 1
 
-        quote_confidence = "exact_citation" if (tag_name or "").lower() == "scripref" else "probable_allusion"
-        if quote_confidence == "exact_citation":
+        # Phase 6: verse-range expansion — capture end verse/chapter when present.
+        verse_end, chapter_end = "", ""
+        range_match = OSIS_RANGE_RE.search(osis_ref)
+        if range_match:
+            _, range_chapter, _, range_verse_end = range_match.groups()
+            verse_end = range_verse_end
+            chapter_end = range_chapter  # same chapter as start for within-chapter ranges
+
+        # Phase 6: three-tier confidence scoring.
+        # scripRef → exact_citation
+        # scripCom with fewer than _ECHO_ALLUSION_WORD_THRESHOLD words → echo_allusion
+        # scripCom with sufficient passage text → probable_allusion
+        tag_lower = (tag_name or "").lower()
+        if tag_lower == "scripref":
+            quote_confidence = "exact_citation"
             exact_quote_references += 1
         else:
-            probable_allusion_references += 1
+            passage_words = len(passage.strip().split())
+            if passage_words < _ECHO_ALLUSION_WORD_THRESHOLD:
+                quote_confidence = "echo_allusion"
+                echo_allusion_references += 1
+            else:
+                quote_confidence = "probable_allusion"
+                probable_allusion_references += 1
 
         references.append(
             Reference(
@@ -105,6 +132,8 @@ def parse_references(thml_file: Path) -> tuple[list[Reference], ParseReport]:
                 chapter_start=chapter_start,
                 verse_start=verse_start,
                 quote_confidence=quote_confidence,
+                verse_end=verse_end,
+                chapter_end=chapter_end,
             )
         )
 
@@ -130,6 +159,7 @@ def parse_references(thml_file: Path) -> tuple[list[Reference], ParseReport]:
         ambiguous_book_ids=ambiguous_book_ids,
         exact_quote_references=exact_quote_references,
         probable_allusion_references=probable_allusion_references,
+        echo_allusion_references=echo_allusion_references,
         duplicate_reference_rationale=(
             "Exact duplicate removed by tuple(volume, author_id, work_id, book, osis_ref, passage)."
             if duplicate_rows_removed
