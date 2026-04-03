@@ -27,8 +27,16 @@ class Phase2ParsingRegressionTests(unittest.TestCase):
                 self.assertEqual(report.duplicate_rows_removed, expected["duplicate_rows_removed"])
                 self.assertEqual(report.exact_quote_references, expected["exact_quote_references"])
                 self.assertEqual(report.probable_allusion_references, expected["probable_allusion_references"])
+                self.assertEqual(report.echo_allusion_references, expected["echo_allusion_references"])
                 self.assertEqual(report.malformed_osis_references, expected["malformed_osis_references"])
                 self.assertEqual(report.ambiguous_book_ids, expected["ambiguous_book_ids"])
+                # Phase 6 verse-range fields — only checked when present in the fixture.
+                if "verse_start" in expected:
+                    self.assertEqual(references[0].verse_start, expected["verse_start"])
+                if "verse_end" in expected:
+                    self.assertEqual(references[0].verse_end, expected["verse_end"])
+                if "chapter_start" in expected:
+                    self.assertEqual(references[0].chapter_start, expected["chapter_start"])
 
 
 if __name__ == "__main__":

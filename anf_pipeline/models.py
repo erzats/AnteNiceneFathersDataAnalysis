@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -18,6 +18,9 @@ class Reference:
     chapter_start: str
     verse_start: str
     quote_confidence: str
+    # Phase 6: verse-range expansion fields (empty string when not a range).
+    verse_end: str = field(default="")
+    chapter_end: str = field(default="")
 
 
 @dataclass(frozen=True)
@@ -34,3 +37,5 @@ class ParseReport:
     exact_quote_references: int
     probable_allusion_references: int
     duplicate_reference_rationale: str
+    # Phase 6: third confidence tier counter.
+    echo_allusion_references: int = field(default=0)

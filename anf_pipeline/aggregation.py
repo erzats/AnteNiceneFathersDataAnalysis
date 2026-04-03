@@ -31,6 +31,8 @@ def write_structured_csv(path: Path, references: Iterable[Reference]) -> None:
                 "books_in_osis",
                 "chapter_start",
                 "verse_start",
+                "verse_end",
+                "chapter_end",
                 "quote_confidence",
                 "testament_group",
                 "osis_ref",
@@ -47,6 +49,8 @@ def write_structured_csv(path: Path, references: Iterable[Reference]) -> None:
                     "|".join(ref.books_in_osis),
                     ref.chapter_start,
                     ref.verse_start,
+                    ref.verse_end,
+                    ref.chapter_end,
                     ref.quote_confidence,
                     ref.testament_group,
                     ref.osis_ref,
@@ -103,6 +107,7 @@ def write_parse_diagnostics_csv(path: Path, reports: Iterable[ParseReport]) -> N
                 "ambiguous_book_ids",
                 "exact_quote_references",
                 "probable_allusion_references",
+                "echo_allusion_references",
                 "duplicate_reference_rationale",
             ]
         )
@@ -120,6 +125,7 @@ def write_parse_diagnostics_csv(path: Path, reports: Iterable[ParseReport]) -> N
                     report.ambiguous_book_ids,
                     report.exact_quote_references,
                     report.probable_allusion_references,
+                    report.echo_allusion_references,
                     report.duplicate_reference_rationale,
                 ]
             )
